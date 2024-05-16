@@ -1,0 +1,19 @@
+{
+  "database": {
+    "rules": "serviceaccount.json"
+  },
+  "hosting": {
+    "public": "new",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
