@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="password.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khatra GRC Dashboard</title>
+   
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('back.jpg'); /* Add your background image path */
+            background-size: cover;
+            background-repeat: no-repeat;
+            color: #000;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff; /* White color for the title */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+
+        .logo img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap; /* Allow containers to wrap */
+            justify-content: space-evenly; /* Evenly distribute space between containers */
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .section {
+            flex-grow: 1;
+            padding: 20px;
+            margin: 10px; /* Add margin between sections */
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-container {
+            width: 300px;
+            padding: 20px;
+            margin: 10px; /* Add margin between charts */
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-container">
+        <u><h1 style="color: black">Khatra GRC Dashboard</h1></u>
+        <div class="logo"><img src="logo.png" alt="Logo"></div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <h2>Risks Overview</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Likelihood</th>
+                        <th>Impact</th>
+                    </tr>
+                </thead>
+                <tbody id="risksTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Leadership Practices</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="lpTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Compliances</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="compTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="chart-container">
+            <h2>Risks Chart</h2>
+            <canvas id="risksChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Leadership Practices Chart</h2>
+            <canvas id="lpChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Compliances Chart</h2>
+            <canvas id="compChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Combined Chart</h2>
+            <canvas id="combinedChart"></canvas>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Oz-A2ctlyWj9FOlvBvpRR48tk8ZzwhM",
+            authDomain: "grc-project-a0eba.firebaseapp.com",
+            databaseURL: "https://grc-project-a0eba-default-rtdb.firebaseio.com",
+            projectId: "grc-project-a0eba",
+            storageBucket: "grc-project-a0eba.appspot.com",
+            messagingSenderId: "399378311808",
+            appId: "1:399378311808:web:b6e6f611cd666c5e471465",
+            measurementId: "G-15GP7F2G56"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Reference to the 'risks' node in the database
+        const risksRef = ref(database, 'risks');
+        // Reference to the 'leadership_practices' node in the database
+        const lpRef = ref(database, 'leadership_practices');
+        // Reference to the 'compliances' node in the database
+        const compRef = ref(database, 'compliances');
+
+        // Function to retrieve data and create table
+        function createTable(ref, tableBodyId) {
+            onValue(ref, (snapshot) => {
+                const data = snapshot.val();
+                const tableBody = document.getElementById(tableBodyId);
+                tableBody.innerHTML = ''; // Clear previous data
+
+                if (data) {
+                    let index = 1;
+                    Object.values(data).forEach((item) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index++}</td>
+                            <td>${item.name}</td>
+                            <td>${item.description}</td>
+                            <td>${item.likelihood || ''}</td>
+                            <td>${item.impact || ''}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="5">No data available</td></tr>`;
+                }
+            });
+        }
+
+        // Function to create chart
+        function createChart(ref, chartId) {
+            onValue(ref, (snapshot) => {
+                const data = snapshot.val();
+                const labels = [];
+                const values = [];
+
+                if (data) {
+                    Object.values(data).forEach((item) => {
+                        labels.push(item.name);
+                        values.push(item.description.length); // Example: Use description length as value
+                    });
+                }
+
+                const ctx = document.getElementById(chartId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Description Length',
+                            data: values,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Function to create combined chart
+        function createCombinedChart() {
+            // Combine data from risks, leadership practices, and compliances
+            const combinedData = {
+                labels: ['Risks', 'Leadership Practices', 'Compliances'],
+                datasets: [{
+                    label: 'Data Count',
+                    data: [10, 5, 8], // Example data, you can replace it with actual counts
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const ctx = document.getElementById('combinedChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: combinedData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Call functions to create tables and charts for Risks, Leadership Practices, and Compliances
+        createTable(risksRef, 'risksTableBody');
+        createTable(lpRef, 'lpTableBody');
+        createTable(compRef, 'compTableBody');
+        createChart(risksRef, 'risksChart');
+        createChart(lpRef, 'lpChart');
+        createChart(compRef, 'compChart');
+        createCombinedChart(); // Create combined chart
+        
+    </script>
+</body>
+</html>
