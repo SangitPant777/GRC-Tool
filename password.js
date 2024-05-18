@@ -3,7 +3,7 @@ const isAuthenticated = sessionStorage.getItem('authenticated');
 
 // If the user is already authenticated, redirect to the dashboard
 if (isAuthenticated) {
-    window.location.href = "index.html"; // Replace "dashboard.html" with the filename of your dashboard HTML file
+    window.location.href = "index.html"; // Redirect to the dashboard
 } else {
     // Define the correct password
     const correctPassword = "sangit";
@@ -34,7 +34,7 @@ if (isAuthenticated) {
         if (enteredPassword === correctPassword) {
             // Password is correct, set authentication flag and redirect to the dashboard
             sessionStorage.setItem('authenticated', true);
-            window.location.href = "index.html"; // Replace "dashboard.html" with the filename of your dashboard HTML file
+            window.location.href = "index.html"; // Redirect to the dashboard
         } else {
             // Password is incorrect, show an error message and deny access
             alert("Incorrect password! Access denied.");
