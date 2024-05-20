@@ -335,13 +335,16 @@
         createChart(compRef, 'compChart');
         createCombinedChart(); // Create combined chart
 
-        // Hide loader and show content when page is fully loaded
-        window.addEventListener('load', () => {
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            document.getElementById('mainContainer').classList.remove('hidden');
-            document.getElementById('chartContainer').classList.remove('hidden');
-        });
+// Hide loader and show content after a delay when page is fully loaded
+window.addEventListener('load', () => {
+    // Add a delay of 3 seconds (3000 milliseconds) before hiding the loader
+    setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        document.getElementById('mainContainer').classList.remove('hidden');
+        document.getElementById('chartContainer').classList.remove('hidden');
+    }, 3000); // Adjust the delay as needed
+});
     </script>
 </body>
 </html>
