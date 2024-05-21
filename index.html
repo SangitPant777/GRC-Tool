@@ -67,15 +67,11 @@
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease; /* Add smooth transition for hovering */
         }
 
-        .chart-container {
-            width: 300px;
-            padding: 20px;
-            margin: 10px; /* Add margin between charts */
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        .section:hover {
+            transform: scale(1.05); /* Increase scale on hover */
         }
 
         table {
@@ -96,6 +92,7 @@
 
         tr:hover {
             background-color: #f5f5f5;
+            cursor: pointer; /* Change cursor to pointer on hover */
         }
 
         canvas {
@@ -122,6 +119,7 @@
     </style>
 </head>
 <body>
+    
 <div class="loader" id="loader">
     <l-helix size="50" speed="2.1" color="black"></l-helix>
 </div>
@@ -178,22 +176,22 @@
     </div>
 
     <div class="container hidden" id="chartContainer">
-        <div class="chart-container">
+        <div class="section chart-container">
             <h2>Risks Chart</h2>
             <canvas id="risksChart"></canvas>
         </div>
 
-        <div class="chart-container">
+        <div class="section chart-container">
             <h2>Leadership Practices Chart</h2>
             <canvas id="lpChart"></canvas>
         </div>
 
-        <div class="chart-container">
+        <div class="section chart-container">
             <h2>Compliances Chart</h2>
             <canvas id="compChart"></canvas>
         </div>
 
-        <div class="chart-container">
+        <div class="section chart-container">
             <h2>Combined Chart</h2>
             <canvas id="combinedChart"></canvas>
         </div>
@@ -335,16 +333,27 @@
         createChart(compRef, 'compChart');
         createCombinedChart(); // Create combined chart
 
-// Hide loader and show content after a delay when page is fully loaded
-window.addEventListener('load', () => {
-    // Add a delay of 3 seconds (3000 milliseconds) before hiding the loader
-    setTimeout(() => {
-        document.getElementById('loader').classList.add('hidden');
-        document.getElementById('mainContent').classList.remove('hidden');
-        document.getElementById('mainContainer').classList.remove('hidden');
-        document.getElementById('chartContainer').classList.remove('hidden');
-    }, 3000); // Adjust the delay as needed
-});
+        // Hide loader and show content after a delay when page is fully loaded
+        window.addEventListener('load', () => {
+            // Add a delay of 3 seconds (3000 milliseconds) before hiding the loader
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('mainContainer').classList.remove('hidden');
+                document.getElementById('chartContainer').classList.remove('hidden');
+            }, 3000); // Adjust the delay as needed
+        });
+
+        // Smooth scrolling effect for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
     </script>
 </body>
 </html>
