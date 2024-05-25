@@ -3,7 +3,7 @@ const isAuthenticated = sessionStorage.getItem('authenticated');
 
 // If the user is already authenticated, redirect to the dashboard
 if (isAuthenticated) {
-    window.location.href = "new.html"; // Replace "dashboard.html" with the filename of your dashboard HTML file
+    window.location.href = "index.html"; // Replace "dashboard.html" with the filename of your dashboard HTML file
 } else {
     // Define the correct password
     const correctPassword = "sangit";
