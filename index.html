@@ -231,6 +231,8 @@
                 const tableBody = document.getElementById(tableBodyId);
                 tableBody.innerHTML = ''; // Clear previous data
 
+                console.log(`Data for ${tableBodyId}:`, data); // Add this line for debugging
+
                 if (data) {
                     let index = 1;
                     Object.values(data).forEach((item) => {
@@ -256,6 +258,8 @@
                 const data = snapshot.val();
                 const labels = [];
                 const values = [];
+
+                console.log(`Chart data for ${chartId}:`, data); // Add this line for debugging
 
                 if (data) {
                     Object.values(data).forEach((item) => {
@@ -288,71 +292,84 @@
             });
         }
 
-        // Function to create combined chart
-        function createCombinedChart() {
-            // Combine data from risks, leadership practices, and compliances
-            const combinedData = {
-                labels: ['Risks', 'Leadership Practices', 'Compliances'],
-                datasets: [{
-                    label: 'Data Count',
-                    data: [10, 5, 8], // Example data, you can replace it with actual counts
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.5)',
-                        'rgba(54, 162, 235, 0.5)',
-                        'rgba(255, 206, 86, 0.5)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            };
-
-            const ctx = document.getElementById('combinedChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: combinedData,
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Call functions to create tables and charts for Risks, Leadership Practices, and Compliances
+        // Create tables for risks, leadership practices, and compliances
         createTable(risksRef, 'risksTableBody');
         createTable(lpRef, 'lpTableBody');
         createTable(compRef, 'compTableBody');
+
+        // Create charts for risks, leadership practices, and compliances
         createChart(risksRef, 'risksChart');
         createChart(lpRef, 'lpChart');
         createChart(compRef, 'compChart');
-        createCombinedChart(); // Create combined chart
 
-        // Hide loader and show content after a delay when page is fully loaded
+        // Create a combined chart
+        function createCombinedChart() {
+            const combinedData = {};
+
+            onValue(risksRef, (snapshot) => {
+                combinedData['Risks'] = snapshot.val();
+                checkCombinedData();
+            });
+
+            onValue(lpRef, (snapshot) => {
+                combinedData['Leadership Practices'] = snapshot.val();
+                checkCombinedData();
+            });
+
+            onValue(compRef, (snapshot) => {
+                combinedData['Compliances'] = snapshot.val();
+                checkCombinedData();
+            });
+
+            function checkCombinedData() {
+                if (combinedData['Risks'] && combinedData['Leadership Practices'] && combinedData['Compliances']) {
+                    const labels = [];
+                    const values = [];
+
+                    Object.entries(combinedData).forEach(([category, data]) => {
+                        Object.values(data).forEach((item) => {
+                            labels.push(`${category}: ${item.name}`);
+                            values.push(item.description.length); // Example: Use description length as value
+                        });
+                    });
+
+                    const ctx = document.getElementById('combinedChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Description Length',
+                                data: values,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        createCombinedChart();
+
+        // Hide the loader and show the content
         window.addEventListener('load', () => {
             // Add a delay of 3 seconds (3000 milliseconds) before hiding the loader
             setTimeout(() => {
+                console.log('Hiding loader and showing content'); // Add this line for debugging
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('mainContent').classList.remove('hidden');
                 document.getElementById('mainContainer').classList.remove('hidden');
                 document.getElementById('chartContainer').classList.remove('hidden');
             }, 3000); // Adjust the delay as needed
-        });
-
-        // Smooth scrolling effect for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
         });
     </script>
 </body>
